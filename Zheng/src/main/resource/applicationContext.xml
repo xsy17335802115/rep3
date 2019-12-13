@@ -1,0 +1,63 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+         http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+
+    <!--扫描所有包的注解-->
+    <context:component-scan base-package="com">
+        <!--Controller 注解不扫描   留给Spring-Mvc 去扫描-->
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+    <!--不想进controller，可以在spring-mvc.xml中配置静态访问路径-->
+
+    <!--配置Mybatis-->
+        <!--配置连接池：-->
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"></property>
+        <property name="url" value="jdbc:mysql://127.0.0.1/csdn"></property>
+        <property name="username" value="root"></property>
+        <property name="password" value="123456"></property>
+    </bean>
+
+        <!--配置Bean 工厂-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+
+        <!--配置扫描有注解的包   SQL语句   代替Mapper配置文件的导入-->
+    <bean id="mapperScanner" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <property name="basePackage" value="com.service.inter" />
+    </bean>
+
+    <!--配置Spring框架声明事务管理-->
+        <!--配置事务管理器-->
+        <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+            <property name="dataSource" ref="dataSource" />
+            <!--传入连接池-->
+         </bean>
+        <!--配置事务通知-->
+        <tx:advice id="txAdvice" transaction-manager="transactionManager">
+            <tx:attributes>
+                <!--设置方法的隔离级别    是否只读-->
+                <tx:method name="save*" propagation="REQUIRED"/>
+                <!--如果当前没有事务，就新建一个事务，如果已经存在一个事务中，加入到这个事务中。这是最常见的选择。-->
+                <tx:method name="select*" read-only="true" />
+                <!--查询语句  只读即可-->
+            </tx:attributes>
+        </tx:advice>
+
+        <!--配置切面-->
+        <aop:config>
+            <!--切点-->
+            <aop:pointcut id="pointcut" expression="execution(* com.service.impl.*.*(..))" />
+            <!--com.service.impl包下的所有类的所有方法   任意传参，任意返回值-->
+            <aop:advisor advice-ref="txAdvice" pointcut-ref="pointcut" />
+        </aop:config>
+</beans>
