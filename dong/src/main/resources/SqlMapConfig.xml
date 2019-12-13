@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+    <settings>
+        <!-- 控制台打印sql语句 -->
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+    </settings>
+
+    <!--可以声明别名-->
+    <!--<typeAliases>
+
+    </typeAliases>-->
+
+    <environments default="mysql">
+        <environment id="mysql">
+            <transactionManager type="JDBC"></transactionManager>
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.jdbc.Driver"></property>
+                <property name="url" value="jdbc:mysql://127.0.0.1/csdn"></property>
+                <property name="username" value="root"></property>
+                <property name="password" value="123456"></property>
+            </dataSource>
+        </environment>
+    </environments>
+
+
+    <mappers>
+        <!--两种方式都可以-->
+        <mapper class="Dao.AdminDao"></mapper>
+        <!--<package name="Dao"></package>-->
+        <!--原来写实体类配置文件，现在写Dao接口   resource="" 里面写xml文件-->
+    </mappers>
+
+</configuration>
